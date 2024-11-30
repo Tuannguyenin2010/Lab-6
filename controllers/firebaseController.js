@@ -1,4 +1,5 @@
 const admin = require("../models/firebaseModel"); // Correctly import admin from firebaseModel.js
+const axios = require("axios");
 
 // Controller for sign up
 const signUp = async (req, res) => {
@@ -29,24 +30,34 @@ const signIn = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Retrieve user by email
-    const user = await admin.auth().getUserByEmail(email);
+    // Firebase Authentication REST API endpoint for signing in
+    const firebaseAuthURL = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=
+AIzaSyAW9R61KJT_GRH7cdETDOajlAp9tZSWDOU`;
 
-    // Generate a custom token for the user
-    const customToken = await admin.auth().createCustomToken(user.uid);
+    // Authenticate the user using Firebase REST API
+    const response = await axios.post(firebaseAuthURL, {
+      email,
+      password,
+      returnSecureToken: true,
+    });
 
-    //Log login time
+    const { idToken, localId } = response.data;
+
+    // Log login time in Firebase Realtime Database
     const db = admin.database();
-    await db.ref(`logs/${user.uid}`).push(({
-      action:"login",
-      timestamp:Date.now(),
-    }))
+    await db.ref(`logs/${localId}`).push({
+      action: "login",
+      timestamp: Date.now(),
+    });
 
-    res.status(200).json({ message: "Signed in successfully", token: customToken });
+    // Return the ID token
+    res.status(200).json({ message: "Signed in successfully", token: idToken });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    // Handle error response from Firebase REST API
+    res.status(400).json({ error: error.response?.data?.error?.message || error.message });
   }
 };
+
 
 
 
