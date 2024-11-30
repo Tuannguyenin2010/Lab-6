@@ -1,7 +1,7 @@
 const admin = require("firebase-admin");
 
 // Firebase Admin SDK service account credentials
-const serviceAccount = require("../fir-app-44e7a-firebase-adminsdk-ddn8p-6a1007e527.json"); // Update the path to your service account file
+const serviceAccount = require("../fir-app-44e7a-firebase-adminsdk-ddn8p-8dc3a43a20.json"); // Update the path to your service account file
 
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) { // Prevent reinitialization
